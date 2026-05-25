@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PROMPTX CHALLENGE — UAJK AIS | Mock Virtual AI Hackathon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --neon-blue: #00d4ff;
+  --neon-purple: #7b2fff;
+  --neon-cyan: #00fff7;
+  --neon-pink: #ff00aa;
+  --dark-bg: #020408;
+  --dark-card: rgba(5,15,30,0.85);
+  --dark-glass: rgba(0,212,255,0.04);
+  --border-glow: rgba(0,212,255,0.25);
+  --text-primary: #e8f4ff;
+  --text-muted: #6a8faa;
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-body);
+  background:var(--dark-bg);
+  color:var(--text-primary);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CUSTOM CURSOR */
+.cursor{position:fixed;width:12px;height:12px;border-radius:50%;background:var(--neon-blue);pointer-events:none;z-index:9999;mix-blend-mode:screen;transition:transform 0.1s;box-shadow:0 0 12px var(--neon-blue),0 0 24px var(--neon-blue);}
+.cursor-ring{position:fixed;width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,212,255,0.5);pointer-events:none;z-index:9998;transition:all 0.15s ease;mix-blend-mode:screen;}
+
+/* CANVAS */
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:1rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(2,4,8,0.7);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border-glow);
+}
+.nav-logo{
+  display:flex;align-items:center;gap:0.75rem;
+  font-family:var(--font-display);font-size:1rem;font-weight:900;
+  color:var(--neon-blue);letter-spacing:0.1em;
+  text-shadow:0 0 20px var(--neon-blue);
+}
+.nav-logo-icon{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;box-shadow:0 0 20px rgba(0,212,255,0.4);
+}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{
+  font-family:var(--font-body);font-size:0.85rem;font-weight:600;
+  color:var(--text-muted);text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;
+  transition:all 0.3s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;
+  background:var(--neon-blue);transform:scaleX(0);transition:transform 0.3s;
+}
+.nav-links a:hover{color:var(--neon-blue);text-shadow:0 0 10px var(--neon-blue);}
+.nav-links a:hover::after{transform:scaleX(1);}
+.nav-cta{
+  padding:0.5rem 1.2rem;
+  font-family:var(--font-display);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;
+  color:var(--dark-bg);background:var(--neon-blue);border:none;border-radius:6px;
+  cursor:pointer;transition:all 0.3s;text-decoration:none;
+  box-shadow:0 0 20px rgba(0,212,255,0.4);
+}
+.nav-cta:hover{background:var(--neon-cyan);box-shadow:0 0 30px rgba(0,255,247,0.6);transform:translateY(-2px);}
+
+/* HERO */
+#hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8rem 2rem 4rem;text-align:center;overflow:hidden;z-index:1;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%);
+}
+.hero-orb{
+  position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;
+}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(123,47,255,0.15),transparent);top:-100px;left:-100px;}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(0,212,255,0.12),transparent);bottom:-50px;right:-50px;}
+.orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(255,0,170,0.08),transparent);top:50%;left:50%;transform:translate(-50%,-50%);}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.4rem 1rem;margin-bottom:1.5rem;
+  background:rgba(0,212,255,0.08);
+  border:1px solid rgba(0,212,255,0.3);border-radius:100px;
+  font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.15em;
+  color:var(--neon-cyan);
+  animation:pulse-border 2s infinite;
+}
+@keyframes pulse-border{0%,100%{border-color:rgba(0,212,255,0.3);}50%{border-color:rgba(0,212,255,0.7);}}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--neon-cyan);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+.hero-university{
+  font-family:var(--font-body);font-size:0.9rem;font-weight:600;
+  letter-spacing:0.25em;text-transform:uppercase;color:var(--text-muted);
+  margin-bottom:1rem;
+}
+.hero-title{
+  font-family:var(--font-display);font-size:clamp(3rem,10vw,8rem);font-weight:900;
+  line-height:0.9;letter-spacing:-0.02em;margin-bottom:0.5rem;
+  background:linear-gradient(135deg,#fff 0%,var(--neon-blue) 50%,var(--neon-purple) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-shadow:none;
+  animation:title-glow 4s ease-in-out infinite alternate;
+}
+@keyframes title-glow{
+  from{filter:drop-shadow(0 0 20px rgba(0,212,255,0.3));}
+  to{filter:drop-shadow(0 0 60px rgba(0,212,255,0.6));}
+}
+.hero-subtitle{
+  font-family:var(--font-display);font-size:clamp(1.5rem,4vw,3rem);font-weight:700;
+  color:var(--neon-blue);letter-spacing:0.1em;margin-bottom:1.5rem;
+  text-shadow:0 0 30px rgba(0,212,255,0.5);
+}
+.hero-tagline{
+  font-family:var(--font-body);font-size:1.4rem;font-weight:300;
+  color:var(--text-muted);letter-spacing:0.3em;text-transform:uppercase;
+  margin-bottom:3rem;
+}
+.hero-tagline span{color:var(--neon-blue);}
+
+/* COUNTDOWN */
+.countdown-wrapper{
+  margin-bottom:3rem;
+  display:flex;flex-direction:column;align-items:center;gap:0.75rem;
+}
+.countdown-label{
+  font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.2em;
+  color:var(--text-muted);text-transform:uppercase;
+}
+.countdown{display:flex;gap:1rem;align-items:center;}
+.countdown-unit{
+  display:flex;flex-direction:column;align-items:center;gap:0.25rem;
+  background:rgba(0,212,255,0.05);
+  border:1px solid rgba(0,212,255,0.2);border-radius:12px;
+  padding:1rem 1.25rem;min-width:80px;
+  backdrop-filter:blur(10px);
+  position:relative;overflow:hidden;
+}
+.countdown-unit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,212,255,0.03),transparent);
+}
+.countdown-num{
+  font-family:var(--font-display);font-size:2.5rem;font-weight:900;
+  color:var(--neon-blue);text-shadow:0 0 20px rgba(0,212,255,0.6);
+  line-height:1;
+}
+.countdown-sep{font-family:var(--font-display);font-size:2rem;color:var(--neon-blue);opacity:0.5;margin-bottom:1.5rem;}
+.countdown-unit-label{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.15em;color:var(--text-muted);}
+
+/* EVENT INFO BAR */
+.event-info{
+  display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;margin-bottom:3rem;
+}
+.event-pill{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.5rem 1rem;
+  background:rgba(123,47,255,0.08);
+  border:1px solid rgba(123,47,255,0.25);border-radius:100px;
+  font-family:var(--font-mono);font-size:0.75rem;color:rgba(180,150,255,0.9);
+}
+.event-pill-icon{font-size:0.9rem;}
+
+/* CTA BUTTONS */
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;}
+.btn-primary{
+  padding:1rem 2.5rem;
+  font-family:var(--font-display);font-size:0.8rem;font-weight:700;letter-spacing:0.12em;
+  color:var(--dark-bg);background:linear-gradient(135deg,var(--neon-blue),var(--neon-cyan));
+  border:none;border-radius:8px;cursor:pointer;text-decoration:none;
+  transition:all 0.3s;
+  box-shadow:0 0 30px rgba(0,212,255,0.4),inset 0 1px 0 rgba(255,255,255,0.2);
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue));
+  opacity:0;transition:opacity 0.3s;
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(0,212,255,0.6);}
+.btn-primary:hover::before{opacity:1;}
+.btn-secondary{
+  padding:1rem 2.5rem;
+  font-family:var(--font-display);font-size:0.8rem;font-weight:700;letter-spacing:0.12em;
+  color:var(--neon-blue);background:transparent;
+  border:1px solid rgba(0,212,255,0.4);border-radius:8px;cursor:pointer;text-decoration:none;
+  transition:all 0.3s;
+  box-shadow:0 0 20px rgba(0,212,255,0.1),inset 0 0 20px rgba(0,212,255,0.03);
+  backdrop-filter:blur(10px);
+}
+.btn-secondary:hover{
+  background:rgba(0,212,255,0.1);border-color:var(--neon-blue);
+  transform:translateY(-3px);box-shadow:0 10px 40px rgba(0,212,255,0.2);
+  color:var(--neon-cyan);
+}
+
+/* SCROLL INDICATOR */
+.scroll-indicator{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+  font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.2em;color:var(--text-muted);
+  animation:float 2s ease-in-out infinite;
+}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--neon-blue),transparent);}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
+
+/* SECTIONS */
+section{position:relative;z-index:1;}
+.section-container{max-width:1200px;margin:0 auto;padding:0 2rem;}
+.section-header{text-align:center;margin-bottom:4rem;}
+.section-label{
+  display:inline-block;
+  font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--neon-blue);margin-bottom:1rem;
+  padding:0.3rem 1rem;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:100px;
+}
+.section-title{
+  font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:900;
+  line-height:1.1;letter-spacing:-0.02em;
+  background:linear-gradient(135deg,#fff,var(--neon-blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.section-desc{
+  margin-top:1rem;font-size:1.1rem;color:var(--text-muted);max-width:600px;margin-inline:auto;
+  line-height:1.7;
+}
+.section-divider{
+  width:60px;height:2px;margin:1.5rem auto 0;
+  background:linear-gradient(90deg,var(--neon-blue),var(--neon-purple));
+  border-radius:2px;
+  box-shadow:0 0 10px var(--neon-blue);
+}
+
+/* ABOUT UAJK AIS */
+#about-ais{padding:6rem 0;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;}
+.about-visual{
+  position:relative;display:flex;align-items:center;justify-content:center;
+}
+.about-logo-display{
+  width:200px;height:200px;
+  border-radius:50%;
+  background:radial-gradient(circle at center,rgba(0,212,255,0.15),rgba(123,47,255,0.05));
+  border:1px solid rgba(0,212,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  box-shadow:0 0 60px rgba(0,212,255,0.15),0 0 120px rgba(123,47,255,0.1);
+}
+.about-logo-display::before{
+  content:'';position:absolute;inset:-1px;
+  border-radius:50%;border:1px solid transparent;
+  background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple),transparent,var(--neon-blue)) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:destination-out;mask-composite:exclude;
+  animation:spin-slow 8s linear infinite;
+}
+@keyframes spin-slow{to{transform:rotate(360deg);}}
+.logo-svg{width:120px;height:120px;}
+.orbit-ring{
+  position:absolute;border-radius:50%;border:1px dashed rgba(0,212,255,0.2);
+  animation:orbit-spin 12s linear infinite;
+}
+.orbit-ring:nth-child(2){width:260px;height:260px;animation-duration:12s;}
+.orbit-ring:nth-child(3){width:320px;height:320px;animation-duration:20s;animation-direction:reverse;}
+.orbit-dot{
+  position:absolute;top:0;left:50%;transform:translateX(-50%) translateY(-50%);
+  width:8px;height:8px;border-radius:50%;background:var(--neon-blue);
+  box-shadow:0 0 10px var(--neon-blue);
+}
+@keyframes orbit-spin{to{transform:rotate(360deg);}}
+
+.about-content{}
+.about-title{
+  font-family:var(--font-display);font-size:2rem;font-weight:900;
+  background:linear-gradient(135deg,#fff,var(--neon-blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:1rem;
+}
+.about-text{color:var(--text-muted);line-height:1.8;margin-bottom:1.5rem;font-size:1.05rem;}
+.campus-list{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.5rem;}
+.campus-item{
+  display:flex;align-items:center;gap:0.75rem;
+  font-family:var(--font-body);font-size:0.95rem;color:var(--text-primary);
+}
+.campus-dot{width:6px;height:6px;border-radius:50%;background:var(--neon-blue);flex-shrink:0;box-shadow:0 0 8px var(--neon-blue);}
+.stats-row{display:flex;gap:2rem;}
+.stat-item{text-align:center;}
+.stat-num{font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--neon-blue);text-shadow:0 0 15px rgba(0,212,255,0.4);}
+.stat-label{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.15em;color:var(--text-muted);}
+
+/* ABOUT PROMPTX */
+#about-promptx{padding:6rem 0;background:linear-gradient(180deg,transparent,rgba(123,47,255,0.03),transparent);}
+.promptx-features{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;}
+.feature-card{
+  padding:2rem 1.5rem;text-align:center;
+  background:rgba(5,15,30,0.6);
+  border:1px solid rgba(0,212,255,0.12);border-radius:16px;
+  backdrop-filter:blur(10px);
+  transition:all 0.4s;position:relative;overflow:hidden;
+}
+.feature-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,212,255,0.03),transparent);
+  opacity:0;transition:opacity 0.4s;
+}
+.feature-card:hover{border-color:rgba(0,212,255,0.4);transform:translateY(-8px);box-shadow:0 20px 60px rgba(0,212,255,0.1);}
+.feature-card:hover::before{opacity:1;}
+.feature-icon{font-size:2.5rem;margin-bottom:1rem;}
+.feature-title{font-family:var(--font-display);font-size:0.85rem;font-weight:700;color:var(--neon-blue);margin-bottom:0.5rem;letter-spacing:0.05em;}
+.feature-text{font-size:0.9rem;color:var(--text-muted);line-height:1.6;}
+
+/* CHALLENGES */
+#challenges{padding:6rem 0;}
+.challenges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.challenge-card{
+  padding:2rem;
+  background:var(--dark-card);
+  border:1px solid rgba(0,212,255,0.1);border-radius:20px;
+  backdrop-filter:blur(20px);
+  transition:all 0.4s;position:relative;overflow:hidden;cursor:default;
+}
+.challenge-card::after{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(123,47,255,0.05));
+  transition:opacity 0.4s;
+}
+.challenge-card:hover{border-color:var(--neon-blue);transform:translateY(-6px);box-shadow:0 30px 80px rgba(0,212,255,0.12);}
+.challenge-card:hover::after{opacity:1;}
+.challenge-card.flagship{
+  grid-column:span 3;
+  display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:center;
+  border-color:rgba(123,47,255,0.3);
+  background:linear-gradient(135deg,rgba(5,15,30,0.9),rgba(20,5,50,0.9));
+}
+.challenge-card.flagship:hover{border-color:var(--neon-purple);}
+.challenge-num{
+  font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.2em;
+  color:var(--neon-blue);opacity:0.6;margin-bottom:0.5rem;
+}
+.challenge-icon{font-size:2.5rem;margin-bottom:1rem;}
+.challenge-title{
+  font-family:var(--font-display);font-size:1rem;font-weight:700;
+  color:var(--text-primary);margin-bottom:0.75rem;letter-spacing:0.03em;
+}
+.challenge-domain{
+  display:inline-block;padding:0.2rem 0.6rem;margin-bottom:0.75rem;
+  background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:4px;
+  font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;color:var(--neon-cyan);
+}
+.challenge-desc{font-size:0.9rem;color:var(--text-muted);line-height:1.6;}
+.challenge-meta{display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;}
+.challenge-tag{
+  padding:0.2rem 0.5rem;
+  font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.08em;
+  border-radius:4px;
+}
+.tag-time{background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);color:rgba(180,150,255,0.8);}
+.tag-diff{background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.2);color:rgba(255,190,100,0.8);}
+.tag-hard{background:rgba(255,0,100,0.08);border:1px solid rgba(255,0,100,0.2);color:rgba(255,100,150,0.8);}
+.flagship-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.4rem 1rem;
+  background:linear-gradient(135deg,rgba(123,47,255,0.2),rgba(255,0,170,0.1));
+  border:1px solid rgba(123,47,255,0.4);border-radius:100px;
+  font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.15em;color:rgba(200,150,255,0.9);
+  margin-bottom:1rem;
+}
+.flagship-visual{
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(123,47,255,0.3),rgba(255,0,170,0.1));
+  display:flex;align-items:center;justify-content:center;font-size:3.5rem;
+  box-shadow:0 0 40px rgba(123,47,255,0.3);
+  border:1px solid rgba(123,47,255,0.3);flex-shrink:0;
+  animation:pulse-glow 3s ease-in-out infinite;
+}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 40px rgba(123,47,255,0.3);}50%{box-shadow:0 0 80px rgba(123,47,255,0.5);}}
+
+/* PROBLEM REVEAL */
+#reveal{padding:6rem 0;}
+.reveal-box{
+  max-width:700px;margin:0 auto;text-align:center;
+  padding:4rem 3rem;
+  background:linear-gradient(135deg,rgba(5,15,30,0.9),rgba(20,5,50,0.8));
+  border:1px solid rgba(123,47,255,0.3);border-radius:24px;
+  backdrop-filter:blur(20px);
+  position:relative;overflow:hidden;
+}
+.reveal-box::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% -20%,rgba(123,47,255,0.15),transparent 60%);
+}
+.lock-icon{font-size:4rem;margin-bottom:1.5rem;filter:drop-shadow(0 0 20px rgba(123,47,255,0.5));}
+.reveal-title{
+  font-family:var(--font-display);font-size:1.5rem;font-weight:900;
+  color:var(--text-primary);margin-bottom:0.75rem;
+}
+.reveal-status{
+  font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.15em;
+  padding:0.4rem 1rem;border-radius:100px;margin-bottom:2rem;
+  display:inline-block;
+}
+.status-locked{background:rgba(255,0,100,0.1);border:1px solid rgba(255,0,100,0.3);color:rgba(255,100,150,0.9);}
+.status-unlocked{background:rgba(0,212,100,0.1);border:1px solid rgba(0,212,100,0.3);color:rgba(0,212,100,0.9);}
+.reveal-desc{color:var(--text-muted);line-height:1.7;margin-bottom:2rem;}
+.btn-reveal-locked{
+  padding:1rem 2.5rem;
+  font-family:var(--font-display);font-size:0.8rem;font-weight:700;letter-spacing:0.1em;
+  color:var(--text-muted);background:rgba(50,50,80,0.3);
+  border:1px solid rgba(100,100,150,0.2);border-radius:8px;cursor:not-allowed;
+  opacity:0.6;
+}
+.btn-reveal-active{
+  padding:1rem 2.5rem;
+  font-family:var(--font-display);font-size:0.8rem;font-weight:700;letter-spacing:0.1em;
+  color:#000;background:linear-gradient(135deg,#00d4ff,#00fff7);
+  border:none;border-radius:8px;cursor:pointer;text-decoration:none;
+  box-shadow:0 0 30px rgba(0,212,255,0.5);
+  transition:all 0.3s;display:inline-block;
+}
+.btn-reveal-active:hover{transform:translateY(-3px);box-shadow:0 15px 50px rgba(0,212,255,0.6);}
+.reveal-time-note{
+  margin-top:1.5rem;font-family:var(--font-mono);font-size:0.65rem;
+  letter-spacing:0.1em;color:var(--text-muted);
+}
+
+/* RULES */
+#rules{padding:6rem 0;background:linear-gradient(180deg,transparent,rgba(0,212,255,0.02),transparent);}
+.rules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.rule-card{
+  padding:2rem;
+  background:var(--dark-card);
+  border:1px solid rgba(0,212,255,0.1);border-radius:16px;
+  backdrop-filter:blur(10px);
+  transition:all 0.3s;
+}
+.rule-card:hover{border-color:rgba(0,212,255,0.3);transform:translateY(-4px);}
+.rule-icon{font-size:2rem;margin-bottom:1rem;}
+.rule-title{font-family:var(--font-display);font-size:0.9rem;font-weight:700;color:var(--neon-blue);margin-bottom:0.5rem;letter-spacing:0.05em;}
+.rule-text{font-size:0.9rem;color:var(--text-muted);line-height:1.6;}
+
+/* REGISTRATION */
+#register{padding:6rem 0;}
+.register-box{
+  text-align:center;
+  padding:5rem 3rem;
+  background:linear-gradient(135deg,rgba(0,212,255,0.05),rgba(123,47,255,0.05));
+  border:1px solid rgba(0,212,255,0.2);border-radius:28px;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(20px);
+}
+.register-box::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 0%,rgba(0,212,255,0.08),transparent 50%),
+             radial-gradient(ellipse at 70% 100%,rgba(123,47,255,0.08),transparent 50%);
+}
+.register-title{
+  font-family:var(--font-display);font-size:clamp(2rem,5vw,3rem);font-weight:900;
+  background:linear-gradient(135deg,#fff,var(--neon-blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:1rem;position:relative;
+}
+.register-desc{color:var(--text-muted);font-size:1.1rem;line-height:1.7;max-width:550px;margin:0 auto 2.5rem;position:relative;}
+.register-perks{
+  display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:3rem;position:relative;
+}
+.perk-pill{
+  display:flex;align-items:center;gap:0.5rem;
+  padding:0.5rem 1rem;
+  background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:100px;
+  font-family:var(--font-body);font-size:0.85rem;color:var(--text-primary);
+}
+.perk-icon{font-size:0.9rem;}
+.register-ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;position:relative;}
+
+/* SUBMISSION */
+#submission{padding:6rem 0;}
+.submission-steps{display:flex;flex-direction:column;gap:0;max-width:800px;margin:0 auto;}
+.step-item{
+  display:flex;gap:2rem;align-items:flex-start;padding:2rem 0;
+  position:relative;
+}
+.step-item:not(:last-child)::after{
+  content:'';position:absolute;left:24px;top:60px;bottom:0;width:1px;
+  background:linear-gradient(to bottom,var(--neon-blue),rgba(0,212,255,0.1));
+}
+.step-num{
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;
+  background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:0.9rem;font-weight:900;color:var(--neon-blue);
+  box-shadow:0 0 20px rgba(0,212,255,0.15);
+}
+.step-content{}
+.step-title{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;}
+.step-desc{color:var(--text-muted);line-height:1.7;}
+.step-code{
+  margin-top:0.75rem;
+  padding:0.75rem 1rem;
+  background:rgba(0,0,0,0.3);border:1px solid rgba(0,212,255,0.1);border-radius:8px;
+  font-family:var(--font-mono);font-size:0.75rem;color:var(--neon-cyan);
+}
+
+/* FAQ */
+#faq{padding:6rem 0;background:linear-gradient(180deg,transparent,rgba(123,47,255,0.02),transparent);}
+.faq-list{max-width:750px;margin:0 auto;display:flex;flex-direction:column;gap:1rem;}
+.faq-item{
+  background:var(--dark-card);border:1px solid rgba(0,212,255,0.1);border-radius:14px;
+  overflow:hidden;transition:border-color 0.3s;
+}
+.faq-item.open{border-color:rgba(0,212,255,0.3);}
+.faq-q{
+  padding:1.5rem;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  font-family:var(--font-body);font-size:1rem;font-weight:600;color:var(--text-primary);
+  transition:color 0.3s;
+}
+.faq-q:hover{color:var(--neon-blue);}
+.faq-arrow{
+  font-size:0.8rem;color:var(--neon-blue);flex-shrink:0;transition:transform 0.3s;
+}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{
+  padding:0 1.5rem;max-height:0;overflow:hidden;transition:all 0.4s ease;
+  color:var(--text-muted);line-height:1.7;font-size:0.95rem;
+}
+.faq-item.open .faq-a{padding:0 1.5rem 1.5rem;max-height:200px;}
+
+/* FOOTER */
+footer{
+  padding:4rem 2rem 2rem;
+  border-top:1px solid rgba(0,212,255,0.1);
+  background:rgba(0,5,15,0.8);
+  position:relative;z-index:1;
+}
+.footer-inner{max-width:1200px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:1fr auto auto auto;gap:3rem;align-items:start;margin-bottom:3rem;}
+.footer-brand{}
+.footer-logo{
+  font-family:var(--font-display);font-size:1.1rem;font-weight:900;
+  color:var(--neon-blue);letter-spacing:0.1em;text-shadow:0 0 15px rgba(0,212,255,0.4);
+  margin-bottom:0.5rem;
+}
+.footer-tagline-small{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.2em;color:var(--text-muted);}
+.footer-col-title{font-family:var(--font-display);font-size:0.7rem;font-weight:700;letter-spacing:0.15em;color:var(--neon-blue);margin-bottom:1rem;text-transform:uppercase;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:0.5rem;}
+.footer-links a{font-size:0.85rem;color:var(--text-muted);text-decoration:none;transition:color 0.3s;}
+.footer-links a:hover{color:var(--neon-blue);}
+.footer-social{display:flex;gap:1rem;}
+.social-btn{
+  width:40px;height:40px;border-radius:10px;
+  background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  text-decoration:none;transition:all 0.3s;color:var(--text-muted);
+}
+.social-btn:hover{background:rgba(0,212,255,0.15);border-color:var(--neon-blue);color:var(--neon-blue);box-shadow:0 0 15px rgba(0,212,255,0.2);transform:translateY(-3px);}
+.footer-bottom{
+  padding-top:2rem;border-top:1px solid rgba(0,212,255,0.08);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+}
+.footer-copy{font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.1em;color:var(--text-muted);}
+.footer-build{font-family:var(--font-display);font-size:0.65rem;color:var(--neon-blue);letter-spacing:0.2em;opacity:0.6;}
+
+/* ANIMATIONS */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.animate-in{animation:fadeInUp 0.8s ease forwards;opacity:0;}
+.delay-1{animation-delay:0.1s;}.delay-2{animation-delay:0.2s;}.delay-3{animation-delay:0.3s;}.delay-4{animation-delay:0.4s;}.delay-5{animation-delay:0.5s;}
+
+/* SCROLL ANIMATIONS */
+.scroll-fade{opacity:0;transform:translateY(40px);transition:all 0.8s ease;}
+.scroll-fade.visible{opacity:1;transform:translateY(0);}
+
+/* GLITCH */
+.glitch{position:relative;}
+.glitch::before,.glitch::after{
+  content:attr(data-text);position:absolute;inset:0;
+  background:linear-gradient(135deg,#fff,var(--neon-blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.glitch::before{animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%);}
+.glitch::after{animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%);}
+@keyframes glitch1{0%,95%,100%{transform:translate(0);opacity:0;}96%{transform:translate(-2px,1px);opacity:0.5;}97%{transform:translate(2px,-1px);opacity:0.5;}98%{transform:translate(-1px,0);opacity:0.5;}99%{transform:translate(1px,1px);opacity:0.5;}}
+@keyframes glitch2{0%,95%,100%{transform:translate(0);opacity:0;}96%{transform:translate(2px,-1px);opacity:0.5;}97%{transform:translate(-2px,1px);opacity:0.5;}98%{transform:translate(1px,0);opacity:0.5;}99%{transform:translate(-1px,-1px);opacity:0.5;}}
+
+/* NEON LINE */
+.neon-line{
+  width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon-blue),var(--neon-purple),transparent);
+  margin:0;opacity:0.4;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .about-grid{grid-template-columns:1fr;}
+  .about-visual{display:none;}
+  .promptx-features{grid-template-columns:repeat(2,1fr);}
+  .challenges-grid{grid-template-columns:1fr;}
+  .challenge-card.flagship{grid-column:span 1;}
+  .rules-grid{grid-template-columns:1fr 1fr;}
+  .footer-top{grid-template-columns:1fr 1fr;}
+  .nav-links{display:none;}
+}
+@media(max-width:600px){
+  .promptx-features{grid-template-columns:1fr;}
+  .rules-grid{grid-template-columns:1fr;}
+  .footer-top{grid-template-columns:1fr;}
+  .hero-ctas{flex-direction:column;align-items:center;}
+  .countdown{gap:0.5rem;}
+  .countdown-num{font-size:1.8rem;}
+  .register-perks{flex-direction:column;align-items:center;}
+  .challenge-card.flagship{display:block;}
+}
+
+/* NOISE OVERLAY */
+.noise{
+  position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* SCANLINE */
+.scanline{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+}
+
+/* TYPING ANIMATION */
+.typing{border-right:2px solid var(--neon-blue);animation:typing-blink 1s infinite;}
+@keyframes typing-blink{0%,100%{border-color:var(--neon-blue);}50%{border-color:transparent;}}
+
+/* MOBILE MENU */
+.mobile-menu-btn{display:none;font-size:1.5rem;color:var(--neon-blue);cursor:pointer;background:none;border:none;}
+@media(max-width:900px){.mobile-menu-btn{display:block;}}
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="scanline"></div>
+<canvas id="particle-canvas"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">⚡</div>
+    <span>UAJK AIS</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about-ais">About</a></li>
+    <li><a href="#challenges">Challenges</a></li>
+    <li><a href="#reveal">Problems</a></li>
+    <li><a href="#rules">Rules</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="https://forms.gle/k5ULUVaFvBgvfogF8" target="_blank" class="nav-cta">REGISTER NOW</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-orb orb-3"></div>
+
+  <div class="hero-badge animate-in delay-1">
+    <span class="badge-dot"></span>
+    LIVE EVENT · 25 MAY 2026
+  </div>
+
+  <p class="hero-university animate-in delay-2">University of Azad Jammu &amp; Kashmir</p>
+  <h1 class="hero-title glitch animate-in delay-2" data-text="PROMPTX CHALLENGE">PROMPTX CHALLENGE</h1>
+  <p class="hero-subtitle animate-in delay-3">Mock Virtual AI Hackathon</p>
+  <p class="hero-tagline animate-in delay-3"><span>Build.</span> Solve. <span>Innovate.</span></p>
+
+  <div class="countdown-wrapper animate-in delay-4">
+    <div class="countdown-label">⏳ EVENT STARTS IN</div>
+    <div class="countdown">
+      <div class="countdown-unit">
+        <div class="countdown-num" id="cd-days">00</div>
+        <div class="countdown-unit-label">DAYS</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-unit">
+        <div class="countdown-num" id="cd-hours">00</div>
+        <div class="countdown-unit-label">HRS</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-unit">
+        <div class="countdown-num" id="cd-mins">00</div>
+        <div class="countdown-unit-label">MIN</div>
+      </div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-unit">
+        <div class="countdown-num" id="cd-secs">00</div>
+        <div class="countdown-unit-label">SEC</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="event-info animate-in delay-4">
+    <div class="event-pill"><span class="event-pill-icon">📅</span> 25 May 2026 · Monday</div>
+    <div class="event-pill"><span class="event-pill-icon">⏰</span> Live at 12:00 PM</div>
+    <div class="event-pill"><span class="event-pill-icon">⏱️</span> Duration: 8 Hours</div>
+    <div class="event-pill"><span class="event-pill-icon">👥</span> 4 Members / Team</div>
+    <div class="event-pill"><span class="event-pill-icon">🌐</span> Online Mode</div>
+  </div>
+
+  <div class="hero-ctas animate-in delay-5">
+    <a href="https://forms.gle/k5ULUVaFvBgvfogF8" target="_blank" class="btn-primary">⚡ Register Now</a>
+    <a href="#challenges" class="btn-secondary">Explore Challenges →</a>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- ABOUT UAJK AIS -->
+<section id="about-ais">
+  <div class="section-container">
+    <div class="about-grid">
+      <div class="about-visual scroll-fade">
+        <div class="orbit-ring"><div class="orbit-dot"></div></div>
+        <div class="orbit-ring"><div class="orbit-dot"></div></div>
+        <div class="about-logo-display">
+          <!-- SVG Logo representation matching the UAJK AIS logo -->
+          <svg class="logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Book -->
+            <path d="M20 80 Q60 70 100 80 L100 95 Q60 85 20 95 Z" fill="#1a5fb4" opacity="0.9"/>
+            <path d="M20 80 Q60 70 100 80" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+            <path d="M20 80 L20 95" stroke="#00d4ff" stroke-width="1.5"/>
+            <path d="M100 80 L100 95" stroke="#00d4ff" stroke-width="1.5"/>
+            <path d="M60 72 L60 95" stroke="#00d4ff" stroke-width="1" opacity="0.5"/>
+            <!-- Pages left -->
+            <path d="M20 80 Q40 65 60 72" stroke="#4488ff" stroke-width="2" fill="none"/>
+            <path d="M20 78 Q40 63 60 70" stroke="#3377ee" stroke-width="1.5" fill="none" opacity="0.6"/>
+            <!-- Pages right -->
+            <path d="M100 80 Q80 65 60 72" stroke="#4488ff" stroke-width="2" fill="none"/>
+            <path d="M100 78 Q80 63 60 70" stroke="#3377ee" stroke-width="1.5" fill="none" opacity="0.6"/>
+            <!-- Head silhouette -->
+            <path d="M45 68 Q42 55 46 45 Q50 30 60 28 Q70 26 74 38 Q78 50 75 65 Q70 68 60 70 Q50 72 45 68 Z" fill="#1a3a6b" stroke="#4488ff" stroke-width="1"/>
+            <!-- Neural network in head -->
+            <circle cx="54" cy="45" r="2.5" fill="#00d4ff" opacity="0.9"/>
+            <circle cx="62" cy="40" r="2.5" fill="#00d4ff" opacity="0.9"/>
+            <circle cx="70" cy="45" r="2.5" fill="#00d4ff" opacity="0.9"/>
+            <circle cx="56" cy="55" r="2.5" fill="#00d4ff" opacity="0.9"/>
+            <circle cx="66" cy="53" r="2.5" fill="#00d4ff" opacity="0.9"/>
+            <line x1="54" y1="45" x2="62" y2="40" stroke="#00d4ff" stroke-width="0.8" opacity="0.7"/>
+            <line x1="62" y1="40" x2="70" y2="45" stroke="#00d4ff" stroke-width="0.8" opacity="0.7"/>
+            <line x1="54" y1="45" x2="56" y2="55" stroke="#00d4ff" stroke-width="0.8" opacity="0.7"/>
+            <line x1="70" y1="45" x2="66" y2="53" stroke="#00d4ff" stroke-width="0.8" opacity="0.7"/>
+            <line x1="56" y1="55" x2="66" y2="53" stroke="#00d4ff" stroke-width="0.8" opacity="0.7"/>
+            <line x1="62" y1="40" x2="56" y2="55" stroke="#00d4ff" stroke-width="0.8" opacity="0.4"/>
+            <!-- Circuit lines from head -->
+            <path d="M70 45 Q78 40 85 38" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+            <path d="M85 38 Q90 36 92 32" stroke="#00d4ff" stroke-width="1.2" fill="none"/>
+            <path d="M85 38 Q88 42 90 46" stroke="#00d4ff" stroke-width="1.2" fill="none"/>
+            <circle cx="92" cy="32" r="3" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
+            <circle cx="90" cy="46" r="3" fill="none" stroke="#00d4ff" stroke-width="1.2"/>
+            <!-- UAJK AIS text -->
+            <text x="60" y="110" text-anchor="middle" fill="#00d4ff" font-family="sans-serif" font-size="8" font-weight="700" letter-spacing="2">UAJK AIS</text>
+          </svg>
+        </div>
+      </div>
+      <div class="about-content scroll-fade">
+        <div class="section-label">About the Society</div>
+        <h2 class="about-title">UAJK Artificial Intelligence Society</h2>
+        <p class="about-text">The UAJK AIS is an AI-focused student society at the University of Azad Jammu &amp; Kashmir, built to bridge the gap between academia and cutting-edge artificial intelligence. We create hands-on learning experiences, hackathons, seminars, and collaborative projects that prepare the next generation of AI innovators.</p>
+        <p class="about-text">Open to students of Computer Science, Software Engineering, and Electrical Engineering — we unite talent across multiple campuses:</p>
+        <div class="campus-list">
+          <div class="campus-item"><div class="campus-dot"></div>Main Campus, Muzaffarabad</div>
+          <div class="campus-item"><div class="campus-dot"></div>Jhelum Valley Campus</div>
+          <div class="campus-item"><div class="campus-dot"></div>Neelum Valley Campus</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-num">5+</div><div class="stat-label">TEAMS</div></div>
+          <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">CAMPUSES</div></div>
+          <div class="stat-item"><div class="stat-num">1ST</div><div class="stat-label">HACKATHON</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- ABOUT PROMPTX -->
+<section id="about-promptx">
+  <div class="section-container">
+    <div class="section-header scroll-fade">
+      <div class="section-label">The Challenge</div>
+      <h2 class="section-title">What is PROMPTX?</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">A first-of-its-kind mock virtual AI hackathon where creativity meets intelligence. No heavy coding required — just AI, prompting, and purpose.</p>
+    </div>
+    <div class="promptx-features">
+      <div class="feature-card scroll-fade delay-1">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">GENERATIVE AI FIRST</div>
+        <div class="feature-text">Every challenge is built around real AI tools — ChatGPT, Claude, Gemini, Runway, Canva AI, and more. AI is your entire toolkit.</div>
+      </div>
+      <div class="feature-card scroll-fade delay-2">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">SELECTION ROUND</div>
+        <div class="feature-text">This mock hackathon selects the top-performing teams to compete in the upcoming onsite, in-person hackathon. Perform well — move on.</div>
+      </div>
+      <div class="feature-card scroll-fade delay-3">
+        <div class="feature-icon">💡</div>
+        <div class="feature-title">NO CODING REQUIRED</div>
+        <div class="feature-text">Smart prompting, creative thinking, and no-code platforms are all you need. Every challenge can be completed without writing a single line of code.</div>
+      </div>
+      <div class="feature-card scroll-fade delay-4">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-title">5 CHALLENGES</div>
+        <div class="feature-text">Five distinct domains — prompt engineering, visual AI, branding, AI system design, and product development — in one 8-hour sprint.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- CHALLENGES -->
+<section id="challenges">
+  <div class="section-container">
+    <div class="section-header scroll-fade">
+      <div class="section-label">The Gauntlet</div>
+      <h2 class="section-title">Five Challenges. Eight Hours.</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Each challenge tests a different dimension of AI creativity. All five must be completed within the 8-hour hackathon window.</p>
+    </div>
+    <div class="challenges-grid">
+
+      <div class="challenge-card scroll-fade delay-1">
+        <div class="challenge-num">01</div>
+        <div class="challenge-icon">📐</div>
+        <div class="challenge-title">The Prompt Architect</div>
+        <div class="challenge-domain">PROMPT ENGINEERING</div>
+        <div class="challenge-desc">Five broken prompts from real AIS departments. Diagnose what's wrong, rebuild them using proven techniques — role assignment, chain-of-thought, few-shot — and prove the improvement with live AI output.</div>
+        <div class="challenge-meta">
+          <span class="challenge-tag tag-time">⏱ 60 min</span>
+          <span class="challenge-tag tag-diff">◆ Moderate</span>
+        </div>
+      </div>
+
+      <div class="challenge-card scroll-fade delay-2">
+        <div class="challenge-num">02</div>
+        <div class="challenge-icon">🎬</div>
+        <div class="challenge-title">AI Storyboard Studio</div>
+        <div class="challenge-domain">VISUAL AI &amp; CREATIVITY</div>
+        <div class="challenge-desc">Turn an AIS campaign brief into a 6–8 frame visual storyboard using AI image generators and writing tools. Think like a creative agency. Plan it, prompt it, build it, pitch it.</div>
+        <div class="challenge-meta">
+          <span class="challenge-tag tag-time">⏱ 60 min</span>
+          <span class="challenge-tag tag-diff">◆ Moderate</span>
+        </div>
+      </div>
+
+      <div class="challenge-card scroll-fade delay-3">
+        <div class="challenge-num">03</div>
+        <div class="challenge-icon">🎨</div>
+        <div class="challenge-title">Brand the AIS</div>
+        <div class="challenge-domain">BRANDING &amp; CONTENT</div>
+        <div class="challenge-desc">Starting from the AIS logo, build a complete professional brand system — colour palette, typography, voice guide, visual rules — then produce a full one-week social media content calendar.</div>
+        <div class="challenge-meta">
+          <span class="challenge-tag tag-time">⏱ 75 min</span>
+          <span class="challenge-tag tag-diff">◆ Moderate</span>
+        </div>
+      </div>
+
+      <div class="challenge-card scroll-fade delay-4">
+        <div class="challenge-num">04</div>
+        <div class="challenge-icon">🤖</div>
+        <div class="challenge-title">Build ARIA</div>
+        <div class="challenge-domain">AI SYSTEM DESIGN</div>
+        <div class="challenge-desc">Design, build, and demo AIS's own intelligent AI assistant — ARIA. Write her personality, knowledge base, and system prompt. Deploy on a no-code platform and let judges interact with her live.</div>
+        <div class="challenge-meta">
+          <span class="challenge-tag tag-time">⏱ 75 min</span>
+          <span class="challenge-tag tag-diff">◆◆ Moderate+</span>
+        </div>
+      </div>
+
+      <div class="challenge-card scroll-fade delay-2" style="grid-column:2/3;border-color:rgba(123,47,255,0.2);">
+        <div class="challenge-num" style="color:var(--neon-purple);">05</div>
+        <div class="challenge-icon">🚀</div>
+        <div class="challenge-title" style="background:linear-gradient(135deg,#fff,var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Build for AIS</div>
+        <div class="challenge-domain" style="color:rgba(180,150,255,0.9);border-color:rgba(123,47,255,0.3);background:rgba(123,47,255,0.08);">AI PRODUCT — FLAGSHIP ★</div>
+        <div class="challenge-desc">150 minutes. A real AIS problem. Every AI tool available. Build a functional, demonstrable AI-powered product that makes some part of AIS's work faster, smarter, or better. It must work when a judge uses it.</div>
+        <div class="challenge-meta">
+          <span class="challenge-tag tag-time">⏱ 150 min</span>
+          <span class="challenge-tag tag-hard">★ Hard</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- PROBLEM REVEAL -->
+<section id="reveal">
+  <div class="section-container">
+    <div class="section-header scroll-fade">
+      <div class="section-label">Problem Statements</div>
+      <h2 class="section-title">Reveal System</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Problem statements are locked until the hackathon goes live. The reveal button activates automatically at 12:00 PM on 25 May 2026.</p>
+    </div>
+    <div class="reveal-box scroll-fade">
+      <div class="lock-icon" id="reveal-icon">🔒</div>
+      <h3 class="reveal-title" id="reveal-title">Problem Statements</h3>
+      <div class="reveal-status status-locked" id="reveal-status">● LOCKED</div>
+      <p class="reveal-desc" id="reveal-desc">Full problem statements for all five challenges will be revealed at the start of the hackathon. Each team will receive their scenario cards and campaign briefs through the official communication channels at exactly 12:00 PM.</p>
+      <div id="reveal-btn-wrap">
+        <button class="btn-reveal-locked" disabled id="reveal-btn">🔒 Problem Statements Locked</button>
+      </div>
+      <div class="reveal-time-note" id="reveal-time-note">UNLOCKS AT 12:00 PM · 25 MAY 2026</div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- RULES -->
+<section id="rules">
+  <div class="section-container">
+    <div class="section-header scroll-fade">
+      <div class="section-label">Guidelines</div>
+      <h2 class="section-title">Rules &amp; Regulations</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="rules-grid">
+      <div class="rule-card scroll-fade delay-1">
+        <div class="rule-icon">👥</div>
+        <div class="rule-title">TEAM SIZE</div>
+        <div class="rule-text">Exactly 4 members per team. Every member must contribute. All five challenges must be attempted within the 8-hour window. No extensions under any circumstance.</div>
+      </div>
+      <div class="rule-card scroll-fade delay-2">
+        <div class="rule-icon">⚡</div>
+        <div class="rule-title">AI TOOLS REQUIRED</div>
+        <div class="rule-text">This is a Generative AI hackathon. You must use AI tools — ChatGPT, Gemini, Claude, Canva AI, Runway, and others. Document every tool used for every challenge or lose marks.</div>
+      </div>
+      <div class="rule-card scroll-fade delay-3">
+        <div class="rule-icon">🚫</div>
+        <div class="rule-title">ZERO PLAGIARISM</div>
+        <div class="rule-text">All work must be created during the hackathon window. Pre-built content, copied outputs, or sharing between teams results in immediate disqualification. No exceptions.</div>
+      </div>
+      <div class="rule-card scroll-fade delay-4">
+        <div class="rule-icon">📁</div>
+        <div class="rule-title">SUBMISSION FORMAT</div>
+        <div class="rule-text">All deliverables submitted in a structured Google Drive folder with exactly 5 sub-folders named as specified. Public link submitted via the official Google Form before the deadline.</div>
+      </div>
+      <div class="rule-card scroll-fade delay-5">
+        <div class="rule-icon">🌐</div>
+        <div class="rule-title">ONLINE CONDUCT</div>
+        <div class="rule-text">Stay connected to the official WhatsApp/Discord channel at all times. Remain professional and respectful. All content must be written in clear English.</div>
+      </div>
+      <div class="rule-card scroll-fade delay-1">
+        <div class="rule-icon">⚖️</div>
+        <div class="rule-title">FAIR JUDGING</div>
+        <div class="rule-text">All teams start simultaneously. Each challenge is scored independently. Total score across all 5 challenges determines the winner. Judges' decisions are final and non-appealable.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- REGISTRATION -->
+<section id="register">
+  <div class="section-container">
+    <div class="register-box scroll-fade">
+      <h2 class="register-title">Ready to Build the Future?</h2>
+      <p class="register-desc">Join UAJK's first AI hackathon. Form your team of 4, register now, and be ready to build something real on 25 May 2026.</p>
+      <div class="register-perks">
+        <div class="perk-pill"><span class="perk-icon">🏅</span> Certificates for All Participants</div>
+        <div class="perk-pill"><span class="perk-icon">🎯</span> Top Teams Advance to Onsite Hackathon</div>
+        <div class="perk-pill"><span class="perk-icon">🧑‍🏫</span> Mentoring &amp; Expert Guidance</div>
+        <div class="perk-pill"><span class="perk-icon">🤝</span> Network &amp; Collaborate</div>
+        <div class="perk-pill"><span class="perk-icon">💼</span> Portfolio &amp; Resume Builder</div>
+      </div>
+      <div class="register-ctas">
+        <a href="https://forms.gle/k5ULUVaFvBgvfogF8" target="_blank" class="btn-primary">⚡ Register Your Team</a>
+        <a href="#challenges" class="btn-secondary">View Challenges</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- SUBMISSION -->
+<section id="submission">
+  <div class="section-container">
+    <div class="section-header scroll-fade">
+      <div class="section-label">Deliverables</div>
+      <h2 class="section-title">Submission Instructions</h2>
+      <div class="section-divider"></div>
+      <p class="section-desc">Follow every step carefully. Broken links or incorrect folder names may result in an ungraded submission.</p>
+    </div>
+    <div class="submission-steps">
+      <div class="step-item scroll-fade">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="step-title">Organise Your Files</div>
+          <div class="step-desc">Create exactly 5 folders, one per challenge, named as follows. Place all outputs for each challenge inside the correct folder.</div>
+          <div class="step-code">Challenge_01_The_Prompt_Architect<br/>Challenge_02_AI_Storyboard_Studio<br/>Challenge_03_Brand_the_AIS<br/>Challenge_04_Build_ARIA<br/>Challenge_05_Build_for_AIS</div>
+        </div>
+      </div>
+      <div class="step-item scroll-fade">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="step-title">Create Your Team Folder</div>
+          <div class="step-desc">Place all 5 challenge folders inside one main folder named after your team. Use underscores, no spaces.</div>
+          <div class="step-code">Team_YourTeamName_Submission</div>
+        </div>
+      </div>
+      <div class="step-item scroll-fade">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="step-title">Upload to Google Drive</div>
+          <div class="step-desc">Upload your complete team folder to Google Drive. Set sharing to <strong style="color:var(--neon-cyan);">"Anyone with the link can view."</strong> Copy the shareable link. Test it in an incognito browser window first.</div>
+        </div>
+      </div>
+      <div class="step-item scroll-fade">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="step-title">Submit via Google Form</div>
+          <div class="step-desc">Fill out the official Google Form shared on the hackathon channel. Paste your Drive link and submit before the deadline. Submit early — do not wait until the final minutes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-container">
+    <div class="section-header scroll-fade">
+      <div class="section-label">Questions</div>
+      <h2 class="section-title">Frequently Asked</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="faq-list scroll-fade">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Do I need coding skills to participate?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">No coding experience is required at all. Every challenge is designed to be completed using AI tools, smart prompting, no-code platforms, and creative thinking. Students with coding skills may use them as a bonus, but it's absolutely not required.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What AI tools are we allowed to use?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">You are encouraged to use any and all AI tools — ChatGPT, Claude, Gemini, Copilot, Canva AI, Adobe Firefly, DALL-E, Runway, CapCut AI, Poe, Perplexity, and more. For the flagship challenge (05), literally everything is permitted. Document which tools you use for every challenge.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          When are the problem statements released?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">Full problem statements and scenario cards are released to all teams at exactly 12:00 PM on 25 May 2026, when the hackathon goes live. The reveal button on this website also activates at that time. Broken down challenge overviews are available above so you can prepare.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can our team be from different campuses?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">Yes! Since this is an online hackathon, teams can include members from Main Campus, Jhelum Valley Campus, and Neelum Valley Campus. All coordination happens through the official digital channels.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What happens if we submit late?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">Late submissions are not accepted under any circumstances — no extensions, no exceptions. Submit as early as possible within the 8-hour window. Early submission gives you time to fix broken Drive links or missing folders before the deadline.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What do the top-performing teams win?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">Top-performing teams earn the opportunity to compete in the upcoming ONSITE hackathon — a real in-person event. All participants receive a certificate of participation. Top teams also benefit from mentoring, expert guidance, and the chance to build real portfolio projects.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How is the overall winner determined?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a">Each of the 5 challenges is scored independently based on its own judging criteria. The overall winner is determined by the highest total score accumulated across all five challenges. Judges' decisions are final and cannot be appealed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="neon-line"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">⚡ UAJK AIS</div>
+        <div class="footer-tagline-small">ARTIFICIAL INTELLIGENCE SOCIETY</div>
+        <div style="margin-top:1rem;font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);line-height:1.6;">University of Azad Jammu &amp; Kashmir<br/>Dept. of Computer Science &amp; IT</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navigation</div>
+        <ul class="footer-links">
+          <li><a href="#about-ais">About UAJK AIS</a></li>
+          <li><a href="#about-promptx">About PROMPTX</a></li>
+          <li><a href="#challenges">Challenges</a></li>
+          <li><a href="#reveal">Problem Reveal</a></li>
+          <li><a href="#rules">Rules</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Event</div>
+        <ul class="footer-links">
+          <li><a href="#register">Register</a></li>
+          <li><a href="#submission">Submission</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Connect</div>
+        <div class="footer-social">
+          <a href="#" class="social-btn" title="LinkedIn">in</a>
+          <a href="#" class="social-btn" title="Instagram">📸</a>
+          <a href="#" class="social-btn" title="WhatsApp">💬</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 UAJK Artificial Intelligence Society. All rights reserved.</div>
+      <div class="footer-build">BUILD. SOLVE. INNOVATE.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;
+  my=e.clientY;
+
+  cursor.style.left=mx-6+'px';
+  cursor.style.top=my-6+'px';
+});
+
+(function animRing(){
+
+  rx+=(mx-rx)*0.12;
+  ry+=(my-ry)*0.12;
+
+  ring.style.left=rx-18+'px';
+  ring.style.top=ry-18+'px';
+
+  requestAnimationFrame(animRing);
+
+})();
+
+document.querySelectorAll('a,button,.faq-q').forEach(el=>{
+
+  el.addEventListener('mouseenter',()=>{
+
+    cursor.style.transform='scale(2)';
+    ring.style.transform='scale(1.5)';
+    ring.style.borderColor='var(--neon-blue)';
+
+  });
+
+  el.addEventListener('mouseleave',()=>{
+
+    cursor.style.transform='scale(1)';
+    ring.style.transform='scale(1)';
+    ring.style.borderColor='rgba(0,212,255,0.5)';
+
+  });
+
+});
+
+
+// PARTICLES
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+
+let W=canvas.width=window.innerWidth,
+    H=canvas.height=window.innerHeight;
+
+window.addEventListener('resize',()=>{
+
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+
+});
+
+const particles=Array.from({length:120},()=>({
+  x:Math.random()*W,
+  y:Math.random()*H,
+  vx:(Math.random()-0.5)*0.3,
+  vy:(Math.random()-0.5)*0.3,
+  r:Math.random()*1.5+0.3,
+  a:Math.random(),
+  c:Math.random()<0.6?'0,212,255':'123,47,255'
+}));
+
+function drawParticles(){
+
+  ctx.clearRect(0,0,W,H);
+
+  particles.forEach(p=>{
+
+    p.x+=p.vx;
+    p.y+=p.vy;
+
+    if(p.x<0)p.x=W;
+    if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H;
+    if(p.y>H)p.y=0;
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+
+    ctx.fillStyle=`rgba(${p.c},${p.a*0.6})`;
+    ctx.fill();
+
+  });
+
+  particles.forEach((a,i)=>
+
+    particles.slice(i+1).forEach(b=>{
+
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+
+      if(d<120){
+
+        ctx.beginPath();
+
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+
+        ctx.strokeStyle=`rgba(0,212,255,${(1-d/120)*0.07})`;
+        ctx.lineWidth=0.5;
+
+        ctx.stroke();
+
+      }
+
+    })
+
+  );
+
+  requestAnimationFrame(drawParticles);
+
+}
+
+drawParticles();
+
+
+// ======================================================
+// LIVE COUNTDOWN + AUTO UNLOCK (PAKISTAN TIME)
+// ======================================================
+
+// 25 MAY 2026 - 12:15 PM Pakistan Time
+const eventTime = new Date('2026-05-25T12:15:00+05:00');
+
+function updateCountdown(){
+
+  const now = new Date();
+  const diff = eventTime.getTime() - now.getTime();
+
+  // EVENT LIVE
+  if(diff <= 0){
+
+    document.getElementById('cd-days').textContent='00';
+    document.getElementById('cd-hours').textContent='00';
+    document.getElementById('cd-mins').textContent='00';
+    document.getElementById('cd-secs').textContent='00';
+
+    // AUTO UNLOCK
+    unlockProblems();
+
+    return;
+  }
+
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+
+  document.getElementById('cd-days').textContent=String(d).padStart(2,'0');
+  document.getElementById('cd-hours').textContent=String(h).padStart(2,'0');
+  document.getElementById('cd-mins').textContent=String(m).padStart(2,'0');
+  document.getElementById('cd-secs').textContent=String(s).padStart(2,'0');
+}
+
+
+// ======================================================
+// PROBLEM REVEAL SYSTEM
+// ======================================================
+
+function unlockProblems(){
+
+  const icon=document.getElementById('reveal-icon');
+  const title=document.getElementById('reveal-title');
+  const status=document.getElementById('reveal-status');
+  const desc=document.getElementById('reveal-desc');
+  const wrap=document.getElementById('reveal-btn-wrap');
+  const note=document.getElementById('reveal-time-note');
+
+  icon.textContent='🔓';
+
+  title.textContent='Problem Statements Revealed!';
+
+  status.className='reveal-status status-unlocked';
+
+  status.textContent='● LIVE NOW';
+
+  desc.textContent='The hackathon is live! Click below to access all official problem statements, scenario cards, and campaign briefs for all five challenges.';
+
+  wrap.innerHTML=`
+    <a href="https://drive.google.com/drive/folders/16ryhDsdVDkxrEGp3EdmYK3JxpltMUags"
+       target="_blank"
+       class="btn-reveal-active">
+      🚀 Access Problem Statements
+    </a>
+  `;
+
+  note.textContent='HACKATHON IS LIVE · 25 MAY 2026 · 12:15 PM';
+
+}
+
+function checkReveal(){
+
+  const now = new Date();
+
+  if(now.getTime() >= eventTime.getTime()){
+
+    unlockProblems();
+
+  }
+
+}
+
+
+// RUN
+updateCountdown();
+checkReveal();
+
+setInterval(()=>{
+
+  updateCountdown();
+  checkReveal();
+
+},1000);
+
+
+// FAQ
+function toggleFaq(el){
+
+  const item=el.parentElement;
+  const isOpen=item.classList.contains('open');
+
+  document.querySelectorAll('.faq-item')
+    .forEach(i=>i.classList.remove('open'));
+
+  if(!isOpen)item.classList.add('open');
+
+}
+
+
+// SCROLL ANIMATIONS
+const obs=new IntersectionObserver(entries=>{
+
+  entries.forEach(e=>{
+
+    if(e.isIntersecting){
+
+      e.target.classList.add('visible');
+
+    }
+
+  });
+
+},{
+  threshold:0.1,
+  rootMargin:'0px 0px -50px 0px'
+});
+
+document.querySelectorAll('.scroll-fade')
+  .forEach(el=>obs.observe(el));
+
+
+// NAV SCROLL
+window.addEventListener('scroll',()=>{
+
+  const nav=document.querySelector('nav');
+
+  nav.style.background=
+    window.scrollY>50
+    ? 'rgba(2,4,8,0.95)'
+    : 'rgba(2,4,8,0.7)';
+
+});
+
+
+// SMOOTH ANCHOR
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+
+  a.addEventListener('click',e=>{
+
+    e.preventDefault();
+
+    const t=document.querySelector(a.getAttribute('href'));
+
+    if(t){
+
+      t.scrollIntoView({
+        behavior:'smooth',
+        block:'start'
+      });
+
+    }
+
+  });
+
+});
+</script>
+</body>
+</html>
