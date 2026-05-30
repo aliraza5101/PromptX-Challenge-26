@@ -656,6 +656,130 @@ footer{
 /* MOBILE MENU */
 .mobile-menu-btn{display:none;font-size:1.5rem;color:var(--neon-blue);cursor:pointer;background:none;border:none;}
 @media(max-width:900px){.mobile-menu-btn{display:block;}}
+/* RESULTS SECTION */
+
+#results{
+  padding:6rem 0;
+  background:linear-gradient(
+    180deg,
+    transparent,
+    rgba(0,212,255,0.03),
+    transparent
+  );
+}
+
+.results-countdown{
+  text-align:center;
+  margin-bottom:4rem;
+}
+
+.results-reveal-title{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,5vw,4rem);
+  color:var(--neon-blue);
+  text-shadow:0 0 25px rgba(0,212,255,.5);
+  margin-bottom:1rem;
+}
+
+.results-hidden{
+  display:none;
+}
+
+.top3-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2rem;
+  margin-top:3rem;
+  margin-bottom:5rem;
+}
+
+.winner-card{
+  background:rgba(5,15,30,.9);
+  border-radius:24px;
+  padding:2rem;
+  text-align:center;
+  border:1px solid rgba(0,212,255,.2);
+  backdrop-filter:blur(20px);
+  transition:.4s;
+}
+
+.winner-card:hover{
+  transform:translateY(-8px);
+}
+
+.first{
+  border:2px solid #ffd700;
+  box-shadow:0 0 40px rgba(255,215,0,.3);
+}
+
+.second{
+  border:2px solid #c0c0c0;
+}
+
+.third{
+  border:2px solid #cd7f32;
+}
+
+.medal{
+  font-size:4rem;
+  margin-bottom:1rem;
+}
+
+.rank-label{
+  font-family:var(--font-display);
+  letter-spacing:.1em;
+  margin-bottom:.5rem;
+}
+
+.team-name{
+  font-size:1.8rem;
+  font-weight:700;
+  color:white;
+  margin-bottom:1rem;
+}
+
+.reason{
+  color:var(--text-muted);
+  line-height:1.7;
+}
+
+.leaderboard{
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+}
+
+.leaderboard-item{
+  background:rgba(5,15,30,.75);
+  border:1px solid rgba(0,212,255,.12);
+  border-radius:16px;
+  padding:1.3rem;
+  transition:.3s;
+}
+
+.leaderboard-item:hover{
+  border-color:var(--neon-blue);
+  transform:translateX(10px);
+}
+
+.lb-rank{
+  color:var(--neon-blue);
+  font-family:var(--font-display);
+  margin-bottom:.4rem;
+}
+
+.reveal-count{
+  font-size:4rem;
+  color:var(--neon-cyan);
+  font-family:var(--font-display);
+  text-shadow:0 0 30px var(--neon-cyan);
+}
+
+@media(max-width:900px){
+  .top3-grid{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 </head>
 <body>
@@ -677,6 +801,7 @@ footer{
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#reveal">Problems</a></li>
     <li><a href="#rules">Rules</a></li>
+    <li><a href="#results">Results</a></li>
     <li><a href="#faq">FAQ</a></li>
   </ul>
   <a href="https://forms.gle/k5ULUVaFvBgvfogF8" target="_blank" class="nav-cta">REGISTER NOW</a>
@@ -1086,6 +1211,115 @@ footer{
 
 <div class="neon-line"></div>
 
+<section id="results">
+
+<div class="section-container">
+
+<div class="section-header">
+<div class="section-label">
+Official Results
+</div>
+
+<h2 class="section-title">
+PROMPTX CHALLENGE 2026
+</h2>
+
+<div class="section-divider"></div>
+
+<p class="section-desc">
+Official Hackathon Rankings & Final Standings
+</p>
+</div>
+
+<div class="results-countdown">
+
+<h3 class="results-reveal-title">
+🏆 Wait is Over!
+</h3>
+
+<div class="top3-grid">
+
+<div class="winner-card second">
+<div class="medal">🥈</div>
+<div class="rank-label">2ND PLACE</div>
+<div class="team-name">MindMesh</div>
+<div class="reason">
+Outstanding ARIA implementation and a functional final product. Lost crucial points because Challenge 5 did not fully demonstrate an AI-powered solution.
+</div>
+</div>
+
+<div class="winner-card first">
+<div class="medal">🥇</div>
+<div class="rank-label">CHAMPION</div>
+<div class="team-name">Cognitive Crew</div>
+<div class="reason">
+Delivered the strongest ARIA assistant, a fully AI-powered Challenge 5 solution, and achieved the highest overall alignment with hackathon objectives.
+</div>
+</div>
+
+<div class="winner-card third">
+<div class="medal">🥉</div>
+<div class="rank-label">3RD PLACE</div>
+<div class="team-name">Quantum Paradox</div>
+<div class="reason">
+Consistently strong performance across all challenges, with particularly impressive implementations in Challenges 4 and 5.
+</div>
+</div>
+
+</div>
+
+<h2 class="section-title" style="margin-bottom:2rem;">
+Full Leaderboard
+</h2>
+
+<div class="leaderboard">
+
+<div class="leaderboard-item">
+<div class="lb-rank">#4 Genesis Engine</div>
+Excellent performance in Challenges 1 and 2, supported by a strong interview presentation. Ranking was affected by an incorrect interpretation of Challenge 4 and an incomplete Challenge 5 submission.
+</div>
+
+<div class="leaderboard-item">
+<div class="lb-rank">#5 Tech Titan</div>
+Demonstrated solid effort in Challenge 5, actively participated in the interview process, and successfully completed all required submissions.
+</div>
+
+<div class="leaderboard-item">
+<div class="lb-rank">#6 Nexus</div>
+Delivered one of the strongest Challenge 2 submissions. Overall ranking was impacted by the absence of an interview and weaker performances in Challenges 4 and 5.
+</div>
+
+<div class="leaderboard-item">
+<div class="lb-rank">#7 InnovHer</div>
+Successfully completed most challenge requirements, but the quality of Challenges 4 and 5 did not meet the expected competitive standard.
+</div>
+
+<div class="leaderboard-item">
+<div class="lb-rank">#8 Gen Z</div>
+The solutions submitted for Challenges 4 and 5 did not align with the core objectives and requirements of the problem statements.
+</div>
+
+<div class="leaderboard-item">
+<div class="lb-rank">#9 Code Sphere</div>
+Missed several critical challenge requirements, which significantly affected the overall score.
+</div>
+
+<div class="leaderboard-item">
+<div class="lb-rank">#10 Cortex Crew</div>
+Did not submit Challenge 4 and showed limited overall participation throughout the competition.
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<div class="neon-line"></div>
 <!-- FAQ -->
 <section id="faq">
   <div class="section-container">
